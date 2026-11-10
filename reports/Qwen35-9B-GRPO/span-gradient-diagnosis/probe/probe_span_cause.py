@@ -12,6 +12,7 @@ import torch.distributed as dist
 from .native_spans import action_offsets, action_records
 from .span_diagnostic_data import boundary_cases, certify, longest, select_trajectories
 from .probe_runtime import indexed, make_model, stats, trajectory_loss
+from .single_step_old import old_probability
 
 
 def load(path):
@@ -124,7 +125,7 @@ def gradient(model, slots, old, mode, rank, world, trajectories, tokens, calls):
     start = synchronized_time()
     for key, offset, count, record, ids, positions, valid in slots:
         current = model(ids, positions)
-        prior = old[key][offset:offset+count].to(rank) if valid else current.detach()
+        prior = old_probability(current,old[key][offset:offset+count].to(rank) if valid and old is not None else None)
         if mode == 'global_token':
             denominator = tokens
         elif mode == 'trajectory_mean':

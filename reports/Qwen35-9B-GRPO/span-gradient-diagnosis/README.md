@@ -45,3 +45,23 @@ done
 ```
 
 公开源码沿用实测方法，模型路径与集群配置分离。公开打包检查覆盖 Python 语法和合成输入测试，GPU 数值取自报告中的原始作业。
+
+## 单步旧概率合并
+
+[完整整步报告](SINGLE_STEP_FUSION_REPORT.md) · [脱敏数据](SINGLE_STEP_FUSION_MEASUREMENTS.json) · [配置](SINGLE_STEP_FUSION_CONFIG.json)
+
+公开版 `probe/train_single_step.py` 提取了实际训练入口和相关助手。模型位置用 `OCCAM_STEP0_MODEL` 设置。以下第一条只做离线梯度比较，第二条在显式调用时执行一次真实更新。两条都要求使用授权的本地已判分批次，并使用独立输出路径。入口之外的 rollout、判分和常驻控制按报告中的阶段计量。
+
+```bash
+export OCCAM_STEP0_MODEL=/path/to/local/step0-model
+mkdir -p results
+python -m unittest discover -s tests
+python -m torch.distributed.run --standalone --nproc_per_node=4 -m probe.probe_single_step_old \
+  --batch "$MAIN_BATCH" --output results/DETACHED_COMPARISON.json --source-commit "$(git rev-parse HEAD)"
+SMOKE_SPEED_RETEST=1 GRPO_SCORING_MODE=exact_native_spans_v1 \
+  GRPO_OLD_PROBABILITY_MODE=detached_current_single_step_v1 \
+  SMOKE_BATCH="$MAIN_BATCH" SMOKE_TRAIN_OUTPUT=results/one_update \
+  python -m torch.distributed.run --standalone --nproc_per_node=4 -m probe.train_single_step
+```
+
+公开打包通过 Python 语法和合成输入测试，GPU 数据来自报告记录的作业。原始轨迹、判分内容、检查点和集群路径留在私有实验存储。

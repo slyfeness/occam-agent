@@ -4,6 +4,7 @@
 
 | 实验 | Slurm | 已观察结果 |
 | --- | ---: | --- |
+| [16×8 拼接与旧概率合并](span-gradient-diagnosis/SINGLE_STEP_FUSION_REPORT.md) | 181504 / 181505 | 单步 110 分 5 秒 → 42 分 32 秒，训练入口与测量数据已公开。 |
 | [BF16 拼接非劣、门控精度与采样噪声](span-gradient-diagnosis/PRECISION_REPORT.md) | 181411 / 181412 / 181413 | 短样本通过 1.2× 非劣门限，FP32 门控补丁退化。 |
 | [拼接训练梯度差异诊断及源码、数据](span-gradient-diagnosis/REPORT.md) | 181383 / 181394 / 181400 | 统一分母后仍有 29.55% 梯度差异，定位到 BF16 门值投影。 |
 | [常驻权重同步与 16×8 四卡试跑](RESIDENT_SCALING_181229.md) | 181227 / 181229 | 两组各更新一次并验证同步，16×8 达到 623.29 token/s。 |

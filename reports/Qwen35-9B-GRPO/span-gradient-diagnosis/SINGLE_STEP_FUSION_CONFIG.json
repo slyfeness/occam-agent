@@ -1,0 +1,51 @@
+{
+  "source_commit": "b8e1ce60f46f054f5197baf0e5d17ddda9ea1550",
+  "baseline_job": 181229,
+  "probe_job": 181504,
+  "trial_job": 181505,
+  "model": "Qwen/Qwen3.5-9B",
+  "dataset": "BrowseComp-Plus",
+  "hardware": {
+    "gpu_model": "A800 80GB",
+    "gpu_count": 4
+  },
+  "batch": {
+    "queries": 16,
+    "trajectories_per_query": 8,
+    "total_trajectories": 128
+  },
+  "inference": {
+    "engines": 4,
+    "tp": 1,
+    "dtype": "bfloat16",
+    "max_num_seqs": 32,
+    "max_num_batched_tokens": 16384,
+    "gpu_memory_utilization": [
+      0.75,
+      0.5,
+      0.75,
+      0.75
+    ],
+    "prefix_cache_mode": "align",
+    "max_model_len": 65536,
+    "temperature": 1,
+    "top_p": 1,
+    "top_k": 0,
+    "max_tokens_per_call": 10000,
+    "max_actor_calls": 20
+  },
+  "training": {
+    "scoring_mode": "exact_native_spans_v1",
+    "old_probability_mode": "detached_current_single_step_v1",
+    "optimizer_steps_per_batch": 1,
+    "gradient_reduction": "mean per trajectory of action token means",
+    "gradient_clip_norm": 1,
+    "ppo_clip_epsilon": 0.2,
+    "learning_rate": 0.000001,
+    "weight_decay": 0,
+    "vllm_logprob_usage": "diagnostics only"
+  },
+  "judge": "local Qwen3-32B",
+  "checkpoint": "four rank shards at completion",
+  "weight_sync": "resident four-replica BF16 snapshot via shared filesystem"
+}
