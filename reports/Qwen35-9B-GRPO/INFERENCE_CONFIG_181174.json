@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "run_id": 181174,
+  "model": "Qwen/Qwen3.5-9B",
+  "dataset": "BrowseComp-Plus",
+  "scope": {
+    "questions": 4,
+    "trajectories_per_question": 4,
+    "optimizer_steps": 1
+  },
+  "hardware": {
+    "gpu_model": "NVIDIA A800 80GB",
+    "gpu_count": 4
+  },
+  "engine": {
+    "vllm_version": "0.19.1",
+    "instances": 4,
+    "tensor_parallel_size": 1,
+    "dtype": "bfloat16",
+    "language_model_only": true,
+    "attention_backend": "FLASH_ATTN",
+    "enforce_eager": false,
+    "cudagraph_mode": "FULL_AND_PIECEWISE",
+    "enable_prefix_caching": true,
+    "mamba_cache_mode": "align",
+    "enable_chunked_prefill": true,
+    "max_model_len": 65536,
+    "max_num_seqs": 32,
+    "max_num_batched_tokens": 16384,
+    "enable_auto_tool_choice": true,
+    "reasoning_parser": "qwen3",
+    "tool_call_parser": "qwen3_coder",
+    "generation_config": "vllm"
+  },
+  "workers": [
+    {
+      "engine": 0,
+      "gpu_memory_utilization": 0.75,
+      "co_located_retriever": false
+    },
+    {
+      "engine": 1,
+      "gpu_memory_utilization": 0.5,
+      "co_located_retriever": true
+    },
+    {
+      "engine": 2,
+      "gpu_memory_utilization": 0.75,
+      "co_located_retriever": false
+    },
+    {
+      "engine": 3,
+      "gpu_memory_utilization": 0.75,
+      "co_located_retriever": false
+    }
+  ],
+  "rollout": {
+    "temperature": 1,
+    "top_p": 1,
+    "top_k": 0,
+    "max_output_tokens_per_call": 10000,
+    "max_actor_calls": 20
+  },
+  "observed": {
+    "peak_running_requests_by_engine": [
+      4,
+      4,
+      4,
+      4
+    ],
+    "graph_capture_seconds_by_engine": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "prefix_cache_hit_fraction": 0.841327366096226
+  }
+}
