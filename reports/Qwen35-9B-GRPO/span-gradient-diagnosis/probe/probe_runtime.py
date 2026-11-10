@@ -66,7 +66,7 @@ def stats(values):
     return {'count':x.numel(),'mean':x.mean().item(),'p99':torch.quantile(x,.99).item(),'max':x.max().item()} if x.numel() else None
 
 
-def make_model(rank, **fsdp_options):
+def make_model(rank, *, precision=torch.bfloat16, **fsdp_options):
     if not MODEL:
         raise ValueError('Set OCCAM_STEP0_MODEL to a local step-0 model directory')
     model = AutoModelForImageTextToText.from_pretrained(MODEL,dtype=torch.float32,local_files_only=True)
@@ -86,7 +86,7 @@ def make_model(rank, **fsdp_options):
     policy = functools.partial(transformer_auto_wrap_policy,transformer_layer_cls={Qwen3_5DecoderLayer})
     fsdp = FSDP(ActionScorer(model),auto_wrap_policy=policy,ignored_modules=[model.model.visual],
                 device_id=rank,use_orig_params=True,
-                mixed_precision=MixedPrecision(param_dtype=torch.bfloat16,reduce_dtype=torch.float32,buffer_dtype=torch.bfloat16),
+                mixed_precision=MixedPrecision(param_dtype=precision,reduce_dtype=torch.float32,buffer_dtype=precision),
                 **fsdp_options)
     fsdp.train()
     return fsdp, trainable, kernels, kernel_calls

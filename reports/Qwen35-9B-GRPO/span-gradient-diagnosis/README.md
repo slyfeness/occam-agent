@@ -26,3 +26,22 @@ python -m torch.distributed.run --standalone --nproc_per_node=4 -m probe.probe_s
 ```
 
 测量数据按统计和匿名边界事件发布。原生 token 序列、题目、回答、原始轨迹和模型资产存放在私有实验存储。
+
+## BF16 非劣诊断
+
+[报告](PRECISION_REPORT.md) · [测量数据](PRECISION_MEASUREMENTS.json) · [入口源码](probe/probe_span_precision.py)
+
+同一目录下，复核时自行提供本地 step 0 模型和 `MAIN_BATCH`。以下三个实验各用四个 rank，仅评分和反传。
+
+```bash
+export OCCAM_STEP0_MODEL=/path/to/local/step0-model
+mkdir -p results
+python -m unittest discover -s tests
+for experiment in a b noise; do
+  python -m torch.distributed.run --standalone --nproc_per_node=4 -m probe.probe_span_precision \
+    --experiment "$experiment" --batch "$MAIN_BATCH" \
+    --output "results/PRECISION_$experiment.json" --source-commit "$(git rev-parse HEAD)"
+done
+```
+
+公开源码沿用实测方法，模型路径与集群配置分离。公开打包检查覆盖 Python 语法和合成输入测试，GPU 数值取自报告中的原始作业。

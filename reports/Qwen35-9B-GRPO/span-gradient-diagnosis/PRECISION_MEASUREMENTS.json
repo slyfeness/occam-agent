@@ -1,0 +1,557 @@
+{
+  "jobs": [
+    {
+      "id": 181411,
+      "status": "COMPLETED",
+      "elapsed_seconds": 246
+    },
+    {
+      "id": 181412,
+      "status": "COMPLETED",
+      "elapsed_seconds": 953
+    },
+    {
+      "id": 181413,
+      "status": "COMPLETED",
+      "elapsed_seconds": 1189
+    }
+  ],
+  "historical": {
+    "repeat": {
+      "relative_l2": 0.010761226290574025,
+      "cosine": 0.9999421713544874
+    },
+    "baseline_spans": {
+      "relative_l2": 0.29553025215977685,
+      "cosine": 0.9560098861845504
+    }
+  },
+  "fp32_reference": {
+    "trajectory_lengths": [
+      1023,
+      7825
+    ],
+    "actions": 2147,
+    "native_calls": 4,
+    "spans": 2,
+    "fp32_native": {
+      "scoring": {
+        "seconds": 9.239625370129943,
+        "allocated_bytes_by_rank": [
+          18267067392,
+          18228945408,
+          20653465088,
+          26986326528
+        ],
+        "reserved_bytes_by_rank": [
+          27040677888,
+          27040677888,
+          27046969344,
+          28034727936
+        ]
+      },
+      "gradient": {
+        "loss": -0.21401846408843994,
+        "forward_backward_seconds": 38.48176168650389,
+        "allocated_bytes_by_rank": [
+          40301352960,
+          40301412352,
+          40301372928,
+          47398334464
+        ],
+        "reserved_bytes_by_rank": [
+          68534927360,
+          64334331904,
+          58476986368,
+          83280003072
+        ]
+      },
+      "scoring_plus_forward_backward_seconds": 47.72138705663383
+    },
+    "fp32_spans_control": {
+      "scoring": {
+        "seconds": 8.45823683962226,
+        "allocated_bytes_by_rank": [
+          18275587072,
+          26994850304,
+          18275609088,
+          18275643392
+        ],
+        "reserved_bytes_by_rank": [
+          29053943808,
+          38289801216,
+          29116858368,
+          29074915328
+        ]
+      },
+      "gradient": {
+        "loss": -0.21401837468147278,
+        "forward_backward_seconds": 40.37772490084171,
+        "allocated_bytes_by_rank": [
+          40301352960,
+          47398344704,
+          40301372416,
+          40301406720
+        ],
+        "reserved_bytes_by_rank": [
+          84095795200,
+          83133202432,
+          83930120192,
+          83846234112
+        ]
+      },
+      "scoring_plus_forward_backward_seconds": 48.83596174046397,
+      "gradient_vs_fp32_native": {
+        "reference_norm": 4.390352081534198,
+        "candidate_norm": 4.391079936803277,
+        "relative_l2": 0.000983198855014986,
+        "cosine": 0.9999995304802042,
+        "max_absolute_error": 0.0004440099000930786
+      },
+      "logprob_vs_fp32_native": {
+        "count": 2147,
+        "mean": 0.0000016372815697594027,
+        "p99": 0.00002288818359375,
+        "max": 0.00005340576171875
+      }
+    },
+    "observed_fp32_activation_classes": [
+      "Embedding",
+      "Linear",
+      "Qwen3_5DecoderLayer",
+      "Qwen3_5GatedDeltaNet"
+    ],
+    "bf16_native": {
+      "scoring": {
+        "seconds": 9.22392351925373,
+        "allocated_bytes_by_rank": [
+          17107844608,
+          17107905024,
+          17107866624,
+          17107900928
+        ],
+        "reserved_bytes_by_rank": [
+          24582815744,
+          24624758784,
+          23200792576,
+          24188551168
+        ]
+      },
+      "gradient": {
+        "loss": -0.21391120553016663,
+        "forward_backward_seconds": 3.5607479009777308,
+        "allocated_bytes_by_rank": [
+          30130145280,
+          30130204672,
+          30130165248,
+          30130203648
+        ],
+        "reserved_bytes_by_rank": [
+          53571747840,
+          53462695936,
+          50549751808,
+          64355303424
+        ]
+      },
+      "scoring_plus_forward_backward_seconds": 12.784671420231462,
+      "gradient_vs_fp32_native": {
+        "reference_norm": 4.390352081534198,
+        "candidate_norm": 4.472158122368541,
+        "relative_l2": 0.37081289101079856,
+        "cosine": 0.932676936862648,
+        "max_absolute_error": 0.06356550753116608
+      },
+      "logprob_vs_fp32_native": {
+        "count": 2147,
+        "mean": 0.013143396843962188,
+        "p99": 0.10451961517333984,
+        "max": 0.19098663330078125
+      }
+    },
+    "bf16_spans": {
+      "scoring": {
+        "seconds": 1.0568881966173649,
+        "allocated_bytes_by_rank": [
+          17924689920,
+          17924750336,
+          17924711936,
+          17924746240
+        ],
+        "reserved_bytes_by_rank": [
+          25107103744,
+          26180845568,
+          25128075264,
+          25128075264
+        ]
+      },
+      "gradient": {
+        "loss": -0.21420927345752716,
+        "forward_backward_seconds": 3.197335736826062,
+        "allocated_bytes_by_rank": [
+          30130145280,
+          30130213888,
+          30130164736,
+          30130199040
+        ],
+        "reserved_bytes_by_rank": [
+          55501127680,
+          80610328576,
+          53487861760,
+          53487861760
+        ]
+      },
+      "scoring_plus_forward_backward_seconds": 4.254223933443427,
+      "gradient_vs_fp32_native": {
+        "reference_norm": 4.390352081534198,
+        "candidate_norm": 4.600882128452182,
+        "relative_l2": 0.3751186422776392,
+        "cosine": 0.9339595707657846,
+        "max_absolute_error": 0.07374648377299309
+      },
+      "logprob_vs_fp32_native": {
+        "count": 2147,
+        "mean": 0.012796994970185733,
+        "p99": 0.0993291091918945,
+        "max": 0.19098663330078125
+      }
+    },
+    "span_to_native_relative_l2_ratio": 1.0116116547488507,
+    "noninferior_at_1_2x": true,
+    "experiment": "a",
+    "source_commit": "ed71e6357f40765010502e9a210f825c91f1f7eb",
+    "optimizer_steps": 0
+  },
+  "fp32_gate": {
+    "trajectory_lengths": [
+      49493,
+      56166,
+      54153,
+      55518,
+      52600,
+      7428,
+      787,
+      24896
+    ],
+    "actions": 44162,
+    "native_calls": 76,
+    "spans": 15,
+    "bf16_native": {
+      "scoring": {
+        "seconds": 60.37375082075596,
+        "allocated_bytes_by_rank": [
+          21579827200,
+          21289634816,
+          21063921664,
+          21072648192
+        ],
+        "reserved_bytes_by_rank": [
+          24568135680,
+          24152899584,
+          24148705280,
+          24570232832
+        ]
+      },
+      "gradient": {
+        "loss": 0.05317869014106691,
+        "forward_backward_seconds": 256.02711611427367,
+        "allocated_bytes_by_rank": [
+          57911168000,
+          56731120640,
+          55820037632,
+          55855667712
+        ],
+        "reserved_bytes_by_rank": [
+          84047560704,
+          84093698048,
+          84003520512,
+          83965771776
+        ]
+      },
+      "scoring_plus_forward_backward_seconds": 316.4008669350296
+    },
+    "bf16_spans": {
+      "scoring": {
+        "seconds": 16.633094247430563,
+        "allocated_bytes_by_rank": [
+          21298302976,
+          21588206592,
+          21072466944,
+          17929040384
+        ],
+        "reserved_bytes_by_rank": [
+          33107738624,
+          33332133888,
+          32602324992,
+          29056040960
+        ]
+      },
+      "gradient": {
+        "loss": 0.05317960772663355,
+        "forward_backward_seconds": 79.56865108571947,
+        "allocated_bytes_by_rank": [
+          56731302912,
+          57911033856,
+          55820064256,
+          39506982400
+        ],
+        "reserved_bytes_by_rank": [
+          84089503744,
+          82837504000,
+          84097892352,
+          83873497088
+        ]
+      },
+      "scoring_plus_forward_backward_seconds": 96.20174533315003,
+      "gradient_vs_bf16_native": {
+        "reference_norm": 0.4835290568863227,
+        "candidate_norm": 0.47960390602580283,
+        "relative_l2": 0.2955925461647999,
+        "cosine": 0.95598819671476,
+        "max_absolute_error": 0.00834512710571289
+      },
+      "logprob_vs_bf16_native": {
+        "count": 44162,
+        "mean": 0.002689221874807339,
+        "p99": 0.0808822631835936,
+        "max": 0.24763107299804688
+      }
+    },
+    "fp32_projection_modules": [
+      "layers.0.linear_attn.in_proj_a",
+      "layers.0.linear_attn.in_proj_b",
+      "layers.1.linear_attn.in_proj_a",
+      "layers.1.linear_attn.in_proj_b",
+      "layers.2.linear_attn.in_proj_a",
+      "layers.2.linear_attn.in_proj_b",
+      "layers.4.linear_attn.in_proj_a",
+      "layers.4.linear_attn.in_proj_b",
+      "layers.5.linear_attn.in_proj_a",
+      "layers.5.linear_attn.in_proj_b",
+      "layers.6.linear_attn.in_proj_a",
+      "layers.6.linear_attn.in_proj_b",
+      "layers.8.linear_attn.in_proj_a",
+      "layers.8.linear_attn.in_proj_b",
+      "layers.9.linear_attn.in_proj_a",
+      "layers.9.linear_attn.in_proj_b",
+      "layers.10.linear_attn.in_proj_a",
+      "layers.10.linear_attn.in_proj_b",
+      "layers.12.linear_attn.in_proj_a",
+      "layers.12.linear_attn.in_proj_b",
+      "layers.13.linear_attn.in_proj_a",
+      "layers.13.linear_attn.in_proj_b",
+      "layers.14.linear_attn.in_proj_a",
+      "layers.14.linear_attn.in_proj_b",
+      "layers.16.linear_attn.in_proj_a",
+      "layers.16.linear_attn.in_proj_b",
+      "layers.17.linear_attn.in_proj_a",
+      "layers.17.linear_attn.in_proj_b",
+      "layers.18.linear_attn.in_proj_a",
+      "layers.18.linear_attn.in_proj_b",
+      "layers.20.linear_attn.in_proj_a",
+      "layers.20.linear_attn.in_proj_b",
+      "layers.21.linear_attn.in_proj_a",
+      "layers.21.linear_attn.in_proj_b",
+      "layers.22.linear_attn.in_proj_a",
+      "layers.22.linear_attn.in_proj_b",
+      "layers.24.linear_attn.in_proj_a",
+      "layers.24.linear_attn.in_proj_b",
+      "layers.25.linear_attn.in_proj_a",
+      "layers.25.linear_attn.in_proj_b",
+      "layers.26.linear_attn.in_proj_a",
+      "layers.26.linear_attn.in_proj_b",
+      "layers.28.linear_attn.in_proj_a",
+      "layers.28.linear_attn.in_proj_b",
+      "layers.29.linear_attn.in_proj_a",
+      "layers.29.linear_attn.in_proj_b",
+      "layers.30.linear_attn.in_proj_a",
+      "layers.30.linear_attn.in_proj_b"
+    ],
+    "beta_boundary_dtype": "FP32 projection; cast to input BF16 before sigmoid",
+    "gate_fp32_native": {
+      "scoring": {
+        "seconds": 59.69559025391936,
+        "allocated_bytes_by_rank": [
+          21591941632,
+          21301620224,
+          21075807744,
+          21084538368
+        ],
+        "reserved_bytes_by_rank": [
+          33294385152,
+          32877051904,
+          32663142400,
+          32707182592
+        ]
+      },
+      "gradient": {
+        "loss": 0.05314113653730601,
+        "forward_backward_seconds": 258.3702626489103,
+        "allocated_bytes_by_rank": [
+          58428336128,
+          57230413824,
+          56305538560,
+          56341712384
+        ],
+        "reserved_bytes_by_rank": [
+          84026589184,
+          84110475264,
+          83919634432,
+          84007714816
+        ]
+      },
+      "scoring_plus_forward_backward_seconds": 318.06585290282965,
+      "gradient_vs_bf16_native": {
+        "reference_norm": 0.4835290568863227,
+        "candidate_norm": 0.5162364054536603,
+        "relative_l2": 0.6533946770296701,
+        "cosine": 0.8022049333547715,
+        "max_absolute_error": 0.03633546829223633
+      }
+    },
+    "gate_fp32_spans": {
+      "scoring": {
+        "seconds": 16.89198775216937,
+        "allocated_bytes_by_rank": [
+          21301768704,
+          21591801344,
+          21075833344,
+          17929040384
+        ],
+        "reserved_bytes_by_rank": [
+          33107738624,
+          33332133888,
+          32602324992,
+          29056040960
+        ]
+      },
+      "gradient": {
+        "loss": 0.053133946377784014,
+        "forward_backward_seconds": 79.6675881035626,
+        "allocated_bytes_by_rank": [
+          57230596096,
+          58428201984,
+          56305565184,
+          39745345536
+        ],
+        "reserved_bytes_by_rank": [
+          83942703104,
+          82837504000,
+          84097892352,
+          84085309440
+        ]
+      },
+      "scoring_plus_forward_backward_seconds": 96.55957585573196,
+      "gradient_vs_gate_fp32_native": {
+        "reference_norm": 0.5162364054536603,
+        "candidate_norm": 0.5195341261554646,
+        "relative_l2": 0.5815543676699687,
+        "cosine": 0.8319909049525035,
+        "max_absolute_error": 0.02539825439453125
+      },
+      "logprob_vs_gate_fp32_native": {
+        "count": 44162,
+        "mean": 0.005888906468257142,
+        "p99": 0.10724349975585934,
+        "max": 0.35846519470214844
+      }
+    },
+    "experiment": "b",
+    "source_commit": "ed71e6357f40765010502e9a210f825c91f1f7eb",
+    "optimizer_steps": 0
+  },
+  "sampling_noise": {
+    "seed": 20261110,
+    "queries": 3,
+    "trajectories_per_query_per_half": 4,
+    "halves": [
+      {
+        "scoring": {
+          "seconds": 92.9820193387568,
+          "allocated_bytes_by_rank": [
+            20675392512,
+            21488113152,
+            21345652736,
+            21184085504
+          ],
+          "reserved_bytes_by_rank": [
+            24572329984,
+            24154996736,
+            24152899584,
+            24150802432
+          ]
+        },
+        "gradient": {
+          "loss": 0.019209736841730773,
+          "forward_backward_seconds": 389.508390057832,
+          "allocated_bytes_by_rank": [
+            54236576768,
+            57533022720,
+            56953594880,
+            56300918784
+          ],
+          "reserved_bytes_by_rank": [
+            83988840448,
+            83946897408,
+            84110475264,
+            83523272704
+          ]
+        },
+        "scoring_plus_forward_backward_seconds": 482.4904093965888,
+        "trajectories": 12,
+        "actions": 35465,
+        "calls": 136,
+        "nonzero_advantages": 4
+      },
+      {
+        "scoring": {
+          "seconds": 120.539023084566,
+          "allocated_bytes_by_rank": [
+            21371561472,
+            21473348608,
+            20724736512,
+            21192105472
+          ],
+          "reserved_bytes_by_rank": [
+            33172750336,
+            33044824064,
+            32438747136,
+            32923189248
+          ]
+        },
+        "gradient": {
+          "loss": 0.033972962060943246,
+          "forward_backward_seconds": 512.5950682163239,
+          "allocated_bytes_by_rank": [
+            57021250560,
+            57436824576,
+            54397837312,
+            56289422848
+          ],
+          "reserved_bytes_by_rank": [
+            83615547392,
+            84089503744,
+            84089503744,
+            83953188864
+          ]
+        },
+        "scoring_plus_forward_backward_seconds": 633.1340913008898,
+        "trajectories": 12,
+        "actions": 45860,
+        "calls": 160,
+        "nonzero_advantages": 4
+      }
+    ],
+    "advantages": "recomputed within each saved-reward half and query",
+    "half_2_vs_half_1": {
+      "reference_norm": 0.9978155838655349,
+      "candidate_norm": 0.9192362840867772,
+      "relative_l2": 1.3080004675959218,
+      "cosine": 0.07480819291563225,
+      "max_absolute_error": 0.06531590223312378,
+      "symmetric_relative_l2": 1.3616149589783386
+    },
+    "experiment": "noise",
+    "source_commit": "ed71e6357f40765010502e9a210f825c91f1f7eb",
+    "optimizer_steps": 0
+  }
+}
