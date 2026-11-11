@@ -1,0 +1,45 @@
+diff --git a/src/rollout.py b/src/rollout.py
+index 5a9496f..bc9bd88 100644
+--- a/src/rollout.py
++++ b/src/rollout.py
+@@ -17 +17 @@
+-def runtime(output, resident=False):
++def runtime(output, resident=False, retriever_instrumenter=None):
+@@ -32 +32,3 @@
+-        ns['instrument_retriever'] = instrument_retriever
++        ns['instrument_retriever'] = (
++            instrument_retriever if retriever_instrumenter is None
++            else lambda source: retriever_instrumenter(instrument_retriever(source)))
+diff --git a/src/train_smoke.py b/src/train_smoke.py
+index 388036c..6e99f28 100644
+--- a/src/train_smoke.py
++++ b/src/train_smoke.py
+@@ -35 +35 @@
+-    def forward(self, ids, positions, return_probe=False):
++    def forward(self, ids, positions, return_probe=False, observe_entropy=False):
+@@ -37,0 +38 @@
++        entropy = []
+@@ -42 +43,6 @@
+-                return logits.gather(-1,target[:,None])[:,0]-torch.logsumexp(logits,dim=-1)
++                log_z = torch.logsumexp(logits,dim=-1)
++                lp = logits.gather(-1,target[:,None])[:,0]-log_z
++                if observe_entropy:
++                    log_p = logits.detach() - log_z.detach()[:, None]
++                    return lp, -(log_p.exp() * log_p).sum(dim=-1)
++                return lp
+@@ -44,0 +51,3 @@
++            if observe_entropy:
++                lp, token_entropy = lp
++                entropy.append(token_entropy)
+@@ -46,0 +56,2 @@
++        if observe_entropy:
++            return lp, torch.cat(entropy)
+@@ -85 +96 @@
+-def trajectory_loss(lp, prior, advantage, world, trajectory_count, action_count):
++def trajectory_loss(lp, prior, advantage, world, trajectory_count, action_count, importance=None):
+@@ -87 +98,4 @@
+-    loss = -torch.minimum(ratio * advantage, ratio.clamp(.8, 1.2) * advantage).sum()
++    objective = torch.minimum(ratio * advantage, ratio.clamp(.8, 1.2) * advantage)
++    if importance is not None:
++        objective = objective * importance
++    loss = -objective.sum()

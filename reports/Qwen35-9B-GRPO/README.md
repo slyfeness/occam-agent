@@ -4,6 +4,7 @@
 
 | 实验 | Slurm | 已观察结果 |
 | --- | ---: | --- |
+| [全参 GRPO 十步稳定性测试](grpo-stability-181915/REPORT.md) | 181915 | 8 步真实更新和同步，第 9 步在 MCP 工具流中断后停止。第 5 步检查点完整。 |
 | [检索同卡 vLLM 缓存 A/B](cache-colocation-ab/README.md) | 181561 | 0.50→0.75 后缓存命中率 15.91%→84.22%，336 请求回放耗时降 30.11%，检索编码器常驻。 |
 | [16×8 拼接与旧概率合并](span-gradient-diagnosis/SINGLE_STEP_FUSION_REPORT.md) | 181504 / 181505 | 单步 110 分 5 秒 → 42 分 32 秒，训练入口与测量数据已公开。 |
 | [BF16 拼接非劣、门控精度与采样噪声](span-gradient-diagnosis/PRECISION_REPORT.md) | 181411 / 181412 / 181413 | 短样本通过 1.2× 非劣门限，FP32 门控补丁退化。 |
