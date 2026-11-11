@@ -1,0 +1,46 @@
+{
+  "source_run": 181915,
+  "attempts": [
+    {
+      "job": 182128,
+      "elapsed_seconds": 2089,
+      "stop": "nccl_collective_timeout_during_snapshot_io"
+    },
+    {
+      "job": 182148,
+      "elapsed_seconds": 1424,
+      "stop": "replayed_weight_digest_mismatch",
+      "receipt": {
+        "source_job": 181915,
+        "checkpoint_step": 5,
+        "replays": [
+          {
+            "step": 6,
+            "archived_batch_sha256": "214eae94d0521cb21d9d9d06d0bdee9e38ba9298c25e28da4919857ae760ef67",
+            "archive_weight_sha256": "f9d7470b7bc114386f2cacb03ad96dec54555c3b203b8205aa29911a7c8a2c92",
+            "replay_weight_sha256": "a822269ea02ab57eea255549601498776ca340dca231b85aaea2c75e01e40204",
+            "elapsed_seconds": 1413.0493486542255,
+            "matches": false,
+            "loss_delta": 0,
+            "gradient_norm_delta": 0.00011444091796875
+          }
+        ]
+      }
+    },
+    {
+      "job": 182163,
+      "elapsed_seconds": 477,
+      "comparison": {
+        "same_raw_header": true,
+        "total_tensors": 427,
+        "changed_tensors": 268,
+        "total_values": 8953803264,
+        "changed_values": 1228783,
+        "changed_fraction": 0.00013723587215060793,
+        "max_absolute_difference": 0.00000762939453125,
+        "rms_difference": 3.1198879510595734e-8,
+        "nonfinite_changed_values": 0
+      }
+    }
+  ]
+}

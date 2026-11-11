@@ -1,0 +1,250 @@
+diff --git a/src/policy_snapshot.py b/src/policy_snapshot.py
+index c7578d2..f105354 100644
+--- a/src/policy_snapshot.py
++++ b/src/policy_snapshot.py
+@@ -65,6 +65,9 @@
+-    with path.with_suffix('.json').open('x') as handle:
+-        receipt = {'snapshot': path.name, 'fingerprint': fingerprint, 'source_tensors': len(weights)}
+-        if verify_disk:
+-            receipt.update(file_sha256=disk_sha, verified_byte_count=path.stat().st_size,
+-                           retries=len(attempts))
+-        json.dump(receipt, handle)
++    receipt = {'snapshot': path.name, 'fingerprint': fingerprint, 'source_tensors': len(weights)}
++    if verify_disk:
++        from .stability import write_json
++
++        receipt.update(file_sha256=disk_sha, verified_byte_count=path.stat().st_size, retries=len(attempts))
++        write_json(path.with_suffix('.json'), receipt)
++    else:
++        with path.with_suffix('.json').open('x') as handle:
++            json.dump(receipt, handle)
+diff --git a/src/snapshot_archive.py b/src/snapshot_archive.py
+index ea41b69..29018c2 100644
+--- a/src/snapshot_archive.py
++++ b/src/snapshot_archive.py
+@@ -6,0 +7 @@
++import time
+@@ -27,0 +29,8 @@
++def wait_for_archive(receipt, timeout=1800):
++    deadline = time.monotonic() + timeout
++    while not receipt.is_file():
++        if time.monotonic() >= deadline:
++            raise TimeoutError('Timed out waiting for the verified archive receipt')
++        time.sleep(1)
++
++
+diff --git a/src/stability_controller.py b/src/stability_controller.py
+index dbf1d40..13264e6 100644
+--- a/src/stability_controller.py
++++ b/src/stability_controller.py
+@@ -19,0 +20 @@
++from .stability_recovery import assert_snapshot_match, batch_sha256, plan_recovery, training_history
+@@ -134,0 +136,9 @@
++def start_trainer(root, environment, first_step=1):
++    with (root / 'trainer.log').open('w', encoding='utf-8') as log:
++        return subprocess.Popen(
++            [sys.executable, '-u', '-m', 'torch.distributed.run', '--standalone', '--nproc_per_node=4',
++             '-m', 'src.stability_train'], stdout=log, stderr=subprocess.STDOUT,
++            env=dict(environment, OCCAM_STABILITY_RUN=str(root), OCCAM_FIRST_TRAIN_STEP=str(first_step)),
++            start_new_session=True)
++
++
+@@ -166,0 +177,2 @@
++    private_env = dict(os.environ)
++    private_env.pop('OCCAM_ACTOR_ADMIN', None)
+@@ -168 +180,46 @@
+-        for step, group in enumerate(plan['training'], 1):
++        resume = os.environ.get('OCCAM_RESUME_RUN')
++        if resume:
++            stage = 'checkpoint_recovery'
++            source = Path(resume).resolve(strict=True)
++            checkpoint, archived = plan_recovery(source, plan)
++            (checkpoints / 'step-05').symlink_to(checkpoint, target_is_directory=True)
++            for row in archived[:5]:
++                step = row['step']
++                (root / row['folder'].name).symlink_to(row['folder'], target_is_directory=True)
++                for suffix in ('json', 'safetensors'):
++                    name = f'step-{step}.{suffix}'
++                    (snapshots / name).symlink_to(source / 'policy-snapshots' / name)
++                previous.append(training_history(row['result']))
++            trainer = start_trainer(root, private_env, first_step=6)
++            receipts = []
++            for row in archived[5:]:
++                step = current = row['step']
++                stage = 'replay_weight_identity'
++                replay_start = time.monotonic()
++                write_json(root / f'train-{step:02d}.json', {
++                    'step': step, 'batch': str(row['batch']), 'previous': previous,
++                    'restore_checkpoint': str(checkpoint) if step == 6 else None,
++                    'empty_or_invalid_rate': row['result']['empty_or_invalid_rate'],
++                    'repetition_triggered': row['result']['repetition_triggered'],
++                })
++                trained = poll_training(trainer, root / f'trained-{step:02d}.json')
++                if not trained['optimizer_step'] or trained['adam_state_step_max'] != step:
++                    raise RuntimeError(f'Replay failed to reconstruct logical step {step}')
++                version = read_json(snapshots / f'step-{step}.json')
++                receipt = {'step': step, 'archived_batch_sha256': batch_sha256(row['batch']),
++                           'archive_weight_sha256': row['archive']['file_sha256'],
++                           'replay_weight_sha256': version['file_sha256'],
++                           'elapsed_seconds': time.monotonic()-replay_start,
++                           'matches': row['archive']['file_sha256'] == version['file_sha256'],
++                           'loss_delta': trained['loss'] - row['result']['train']['loss'],
++                           'gradient_norm_delta': trained['grad_norm'] - row['result']['train']['grad_norm']}
++                receipts.append(receipt)
++                write_json(root / 'RECOVERY.json', {'source_job': 181915, 'checkpoint_step': 5, 'replays': receipts})
++                assert_snapshot_match(row['archive'], version)
++                (root / row['folder'].name).symlink_to(row['folder'], target_is_directory=True)
++                previous.append(training_history(row['result']))
++                print(json.dumps({'replayed_step': step, 'weight_identity': True,
++                                  'seconds': receipt['elapsed_seconds']}), flush=True)
++            memory = archived[-1]['result']['memory_utilization_colocated']
++        for step in range(len(previous) + 1, 11):
++            group = plan['training'][step-1]
+@@ -219,2 +275,0 @@
+-            private_env = dict(os.environ)
+-            private_env.pop('OCCAM_ACTOR_ADMIN', None)
+@@ -245,5 +300 @@
+-                with (root / 'trainer.log').open('w', encoding='utf-8') as log:
+-                    trainer = subprocess.Popen(
+-                        [sys.executable, '-u', '-m', 'torch.distributed.run', '--standalone', '--nproc_per_node=4',
+-                         '-m', 'src.stability_train'], stdout=log, stderr=subprocess.STDOUT,
+-                        env=dict(private_env, OCCAM_STABILITY_RUN=str(root)), start_new_session=True)
++                trainer = start_trainer(root, private_env)
+diff --git a/src/stability_recovery.py b/src/stability_recovery.py
+new file mode 100644
+index 0000000..fe7467d
+--- /dev/null
++++ b/src/stability_recovery.py
+@@ -0,0 +1,58 @@
++"""Validate a step-5 restore and an exact replay of the three uncheckpointed updates."""
++
++import hashlib
++from pathlib import Path
++
++from .stability import read_json
++
++
++def assert_snapshot_match(archived, replayed):
++    digest = archived.get('file_sha256')
++    if not isinstance(digest, str) or len(digest) != 64 or digest != replayed.get('file_sha256'):
++        raise ValueError('Replayed full weight digest differs from the archived snapshot')
++    for key in ('snapshot', 'fingerprint', 'verified_byte_count'):
++        if archived[key] != replayed[key]:
++            raise ValueError(f'Replayed snapshot metadata differs: {key}')
++
++
++def plan_recovery(source, plan):
++    prior = read_json(source / 'RUN_PLAN.json')
++    for key in ('pool_sha256', 'seed', 'training'):
++        if prior[key] != plan[key]:
++            raise ValueError(f'Frozen run identity differs for {key}')
++    status = read_json(source / 'STATUS.json')
++    if (status['state'], status['optimizer_steps'], status['current_step'], status['stage']) != (
++            'failed', 8, 9, 'rollout_and_api_judge'):
++        raise ValueError('Expected eight committed updates followed by a failed ninth rollout')
++    checkpoint = source / 'checkpoints' / 'step-05'
++    if read_json(checkpoint / 'COMPLETE.json') != {'step': 5, 'world_size': 4}:
++        raise ValueError('Incomplete step-5 checkpoint')
++    for rank in range(4):
++        size = (checkpoint / f'checkpoint-rank{rank}.pt').stat()
++        if not size.st_size or size.st_blocks * 512 < size.st_size:
++            raise ValueError('Missing or sparse step-5 optimizer shard')
++    rows = []
++    for step in range(1, 9):
++        folder = source / f'step-{step:02d}'
++        result = read_json(folder / 'STEP_RESULT.json')
++        train = result['train']
++        if (result['step'] != step or result['query_ids'] != plan['training'][step-1]
++                or not result['policy_synced'] or not train['optimizer_step']
++                or train['adam_state_step_max'] != step):
++            raise ValueError(f'Incomplete archived step {step}')
++        archive = read_json(source / 'policy-snapshots' / f'step-{step}.json')
++        assert_snapshot_match(archive, archive)
++        batches = sorted(folder.glob('rollout-*/TRAIN_BATCH.json'))
++        if not batches:
++            raise ValueError(f'No archived training batch at step {step}')
++        rows.append({'step': step, 'folder': folder, 'result': result, 'archive': archive, 'batch': batches[-1]})
++    return checkpoint, rows
++
++
++def batch_sha256(path):
++    with Path(path).open('rb') as handle:
++        return hashlib.file_digest(handle, 'sha256').hexdigest()
++
++
++def training_history(result):
++    return {key: result['train'][key] for key in ('grad_norm', 'entropy', 'empty_or_invalid_rate')}
+diff --git a/src/stability_train.py b/src/stability_train.py
+index 55b4d7a..44769d6 100644
+--- a/src/stability_train.py
++++ b/src/stability_train.py
+@@ -12 +12 @@
+-from .checkpoint import save_rank, sharded_state
++from .checkpoint import load_rank, save_rank, sharded_state
+@@ -14,0 +15 @@
++from .snapshot_archive import wait_for_archive
+@@ -57 +58,6 @@
+-    if saved:
++    restore = command.get('restore_checkpoint')
++    if restore:
++        if command['step'] != 6 or saved:
++            raise RuntimeError('Checkpoint restore must start immediately before replay of step 6')
++        load_rank(model, optimizer, Path(restore) / f'checkpoint-rank{rank}.pt', rank, world, 5)
++    elif saved:
+@@ -62,3 +67,0 @@
+-        restored_steps = [int(state['step'].item()) for state in optimizer.state.values()]
+-        if not restored_steps or max(restored_steps) != command['step'] - 1:
+-            raise RuntimeError('Retained Adam state does not match the preceding update')
+@@ -68,0 +72,4 @@
++    if command['step'] > 1:
++        restored_steps = [int(state['step'].item()) for state in optimizer.state.values()]
++        if not restored_steps or max(restored_steps) != command['step'] - 1:
++            raise RuntimeError('Retained Adam state does not match the preceding update')
+@@ -153,0 +161,4 @@
++    # Rank 0 performs filesystem I/O after the state-dict gather. Keep the other
++    # ranks out of a GPU collective until the verified archive is published.
++    if rank != 0:
++        wait_for_archive(snapshots / f'step-{step}.json')
+@@ -180,0 +192,3 @@
++    first_step = int(os.environ.get('OCCAM_FIRST_TRAIN_STEP', '1'))
++    if first_step not in (1, 6):
++        raise ValueError('Unsupported first training step')
+@@ -183 +197 @@
+-        for step in range(1, 11):
++        for step in range(first_step, 11):
+diff --git a/tests/test_snapshot_archive.py b/tests/test_snapshot_archive.py
+index 6835aa0..b6d61d4 100644
+--- a/tests/test_snapshot_archive.py
++++ b/tests/test_snapshot_archive.py
+@@ -8 +8 @@
+-from src.snapshot_archive import verify_archive, write_archive
++from src.snapshot_archive import verify_archive, wait_for_archive, write_archive
+@@ -11,0 +12,8 @@
++    def test_archive_wait_uses_completion_file(self):
++        with tempfile.TemporaryDirectory() as temp:
++            path = Path(temp) / 'step-6.json'
++            with self.assertRaisesRegex(TimeoutError, 'archive receipt'):
++                wait_for_archive(path, timeout=0)
++            path.write_text('{}')
++            wait_for_archive(path, timeout=0)
++
+diff --git a/tests/test_stability_recovery.py b/tests/test_stability_recovery.py
+new file mode 100644
+index 0000000..9e0dd73
+--- /dev/null
++++ b/tests/test_stability_recovery.py
+@@ -0,0 +1,14 @@
++import unittest
++
++from src.stability_recovery import assert_snapshot_match
++
++
++class RecoveryTests(unittest.TestCase):
++    def test_full_digest_is_required_even_when_probe_matches(self):
++        archived = {'snapshot': 'step-6.safetensors', 'fingerprint': 'same',
++                    'verified_byte_count': 10, 'file_sha256': 'a'*64}
++        assert_snapshot_match(archived, dict(archived))
++        with self.assertRaisesRegex(ValueError, 'full weight digest'):
++            assert_snapshot_match(archived, dict(archived, file_sha256='b'*64))
++        with self.assertRaisesRegex(ValueError, 'full weight digest'):
++            assert_snapshot_match(archived, dict(archived, file_sha256=None))
